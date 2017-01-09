@@ -10,12 +10,13 @@ public class FightManager : MonoBehaviour {
 	public Text enemyHealthBar;
 	public Text playerHealthBar;
 	public Text result;
+	public Button Ult;
 
 	public int pMissTurn = 0;
 	public int eMissTurn = 0;
 
-	public int[] pAttackBuff = {0, 0};
-	public int[] AttackBuff = {0, 0};
+	private List<AttackBuff> playerAttackBuff;
+	private List<AttackBuff> enemyAttackBuff;
 
 	public int pInvurable = 0;
 	public int eInvurable = 0;
@@ -23,9 +24,27 @@ public class FightManager : MonoBehaviour {
 	private Enemy eManager;
 	private PlayerManager pManager;
 
+	private List<Skill> pSkills;
+	private List<Skill> eSkills;
+
 	void Start(){
 		eManager = enemy.GetComponent<Enemy> ();
-		pManager = player.GetComponent<PlayerManager> ();
+		pManager = (GameObject.FindGameObjectWithTag("Player")).GetComponent<PlayerManager> ();
+		playerAttackBuff = new List<AttackBuff>();
+		enemyAttackBuff = new List<AttackBuff>();
+	}
+
+	void useSkill(Skill sk){
+	}
+
+	private int calculateBuffs(List<AttackBuff> bl){
+		int retVal = 0;
+		foreach(AttackBuff x in bl){
+			if (x.time > 0)
+				retVal += x.attack;
+			x.time--;
+		}
+		return retVal;
 	}
 
 	void enemyAttack(){
@@ -35,15 +54,17 @@ public class FightManager : MonoBehaviour {
 			pInvurable--;
 		if (eMissTurn > 0)
 			eMissTurn--;
+		if (pMissTurn > 0)
+			pMissTurn--;
 	}
 
 	public void useSkill1(){
-		eManager.HealthPoints--;
+		
 		enemyAttack ();
 	}
 
 	public void useSkill2(){
-		eMissTurn += 2;
+		
 		enemyAttack ();
 	}
 
@@ -53,15 +74,19 @@ public class FightManager : MonoBehaviour {
 	}
 
 	void Update(){
+		/*if(Input.mousePosition.x > Ult.transform.position.x){
+			Ult.interactable = true;
+		}else{
+			Ult.interactable = false;
+		}*/
 		if (eManager.HealthPoints <= 0) {
 			result.text = "YOU WON";
 			SceneManager.LoadScene ("First");
-			System.Threading.Thread.Sleep(2000);
 		}
 		if (pManager.HealthPoints <= 0) {
+			pManager.HealthPoints = 1;
 			result.text = "YOU LOST";
 			SceneManager.LoadScene ("First");
-			System.Threading.Thread.Sleep(2000);
 		}
 		enemyHealthBar.text = "Enemy HP: " + eManager.HealthPoints;
 		playerHealthBar.text = "Your HP: " + pManager.HealthPoints;
